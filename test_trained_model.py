@@ -3,7 +3,12 @@ import cv2
 import time
 import pickle 
 import os
+import numpy as np
 from sklearn.neural_network import MLPClassifier
+import importlib
+
+from hand_crafted_model import CustomModel
+
 WHITE = (255,255,255)
 RED = (255,0,0)
 
@@ -25,12 +30,11 @@ def getFingerTipData(data):
     return tipsData
 
 # load model
-model:MLPClassifier = None
+model = None
 with open(os.getcwd() + "\model.pickle","rb") as f:
     model = pickle.load(f)
 
 assert model != None
-assert type(model) is MLPClassifier
 
 # dectect hands loop 
 with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, min_tracking_confidence=0.7,max_num_hands=2) as hands:
@@ -45,8 +49,8 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                 dataX.append(pos.x)
                 dataX.append(pos.y)
                 dataX.append(pos.z)
-            
-            prediction = symbols[model.predict([dataX])[0]]
+            dataX = np.array([dataX])
+            prediction = symbols[model.predict(dataX)[0]]
             # draw the landmarks
             for handLandmarks in results.multi_hand_landmarks:
                 drawingModule.draw_landmarks(frame, handLandmarks, handsModule.HAND_CONNECTIONS)
